@@ -1,0 +1,32 @@
+{
+  "info": {},
+  "mods": [
+    {
+      "name": "mod name",
+      "version": "1.0.0",
+      "optional": false,
+      "domainName": "cyberpunk2077",
+      "source": {
+        "type": "nexus",
+        "modId": 123456,
+        "fileId": 102383,
+        "md5": "c4d2680439434434cfa569fac224efa4",
+        "fileSize": 3551,
+        "logicalFilename": "Mod Name",
+        "updatePolicy": "prefer",
+        "tag": "tag"
+      },
+      "author": "author",
+      "details": {
+        "category": "Locations",
+        "type": ""
+      },
+      "phase": 0
+    }],
+  "modRules": [],
+  "loadOrder": [],
+  "tools": [],
+  "collectionConfig": {
+    "recommendNewProfile": true
+  }
+}
