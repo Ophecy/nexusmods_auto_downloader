@@ -259,14 +259,18 @@ class NexusAutoDownloader:
         print("Waiting for downloads to start...")
         time.sleep(self.config.delay_for_download)
         
-        print("Closing all tabs (Ctrl+Shift+W)...")
-        self.browser.close_all_tabs()
+        print("Closing all tabs (Ctrl+W for each)...")
+        # Close tabs one by one (up to BATCH_SIZE)
+        for i in range(self.BATCH_SIZE):
+            pyautogui.hotkey('ctrl', 'w')
+            time.sleep(0.1)
         
         print("Reopening browser...")
-        webbrowser.open('about:blank')
+        time.sleep(1)
+        webbrowser.open('https://www.nexusmods.com')
         
-        print("Waiting for browser restart (10s)...")
-        time.sleep(10)
+        print("Waiting for browser to be ready (5s)...")
+        time.sleep(5)
         
         print("✓ Browser ready, resuming...\n")
 
