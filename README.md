@@ -220,6 +220,65 @@ See [LICENSE](LICENSE) file for full details.
 3. Check your browser's download settings
 4. Consider a Nexus Premium account for faster downloads
 
+## 🔮 Future Features
+
+### Planned Features
+
+#### User Experience
+- 🖥️ **Graphical Interface (GUI)**: PyQt5/Tkinter interface with real-time progress visualization
+- 🤖 **Automatic Button Detection**: OCR/image detection to eliminate manual click recording
+- 🔔 **Notifications**: Desktop notifications, Discord webhooks, and email alerts
+- ⏸️ **Pause/Resume**: Keyboard shortcuts to pause and resume downloads
+- 🧪 **Dry-Run Mode**: Preview what would be downloaded without actually downloading
+
+#### Reliability & Error Handling
+- 🔄 **Smart Retry System**: Automatic retry with exponential backoff
+- 📸 **Error Screenshots**: Automatic screenshots for debugging failed downloads
+- 🚨 **Error Detection**: Detect unavailable mods and deleted files
+- 🔍 **Post-Download Verification**: Verify files actually downloaded successfully
+- 🌐 **Rate Limit Detection**: Auto-adjust delays when Nexus Mods throttles requests
+
+#### Advanced Features
+- 👑 **Nexus Premium Support**: Direct API downloads for Premium members
+- 🌐 **Selenium Integration**: More reliable browser automation with headless mode
+- 🎯 **Multi-Browser Support**: Automatic detection and support for Chrome, Firefox, Edge
+- 📦 **Multi-Collection Support**: Process multiple collections with duplicate detection
+- ⚙️ **Persistent Configuration**: YAML config file to save preferences and click positions per game
+
+#### Analytics & Reporting
+- 📊 **Advanced Statistics**: Download speed, ETA, success rate dashboard
+- 📈 **Progress Visualization**: Real-time graphs and detailed reports
+- 📋 **Export Reports**: JSON/CSV export of download statistics
+- 📝 **Detailed Logging**: Rotating logs with configurable verbosity
+
+#### Data Management
+- ✅ **Enhanced Progress Tracking**: JSON-based progress with timestamps and metadata
+- 🔍 **Collection Validation**: Pre-flight checks for invalid mods
+- 🧹 **Smart Tab Management**: Track actual open tabs instead of fixed batch size
+
+### Development Priorities
+
+**Phase 1 - Quick Wins** (1-2 weeks)
+- Dry-run mode
+- Smart retry system
+- Enhanced logging
+- YAML configuration
+- Tab management improvements
+
+**Phase 2 - User Experience** (1 month)
+- Basic GUI (Tkinter)
+- Automatic button detection (OCR)
+- Desktop notifications
+- Pause/resume functionality
+
+**Phase 3 - Advanced Features** (2-3 months)
+- Selenium integration
+- Nexus Premium API support
+- Analytics dashboard
+- Headless mode
+
+See `IMPROVEMENTS.md` for detailed implementation roadmap.
+
 ---
 
 **Made with ❤️ for the modding community**
