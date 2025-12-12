@@ -1,0 +1,17 @@
+"""
+Domain model for downloader configuration.
+"""
+
+from dataclasses import dataclass
+
+
+@dataclass
+class DownloaderConfig:
+    """Configuration for the downloader."""
+    
+    game_domain: str = "cyberpunk2077"
+    delay_before_click: float = 2.0
+    delay_for_download: float = 6.0
+    delay_between_mods: float = 0.5
+    auto_close: bool = True
+    progress_file: str = "downloaded_mods.txt"

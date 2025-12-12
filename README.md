@@ -33,50 +33,52 @@ pip install -r requirements.txt
 ### Basic Usage
 
 ```bash
-python nexus_downloader.py
+python -m src.main
 ```
 
 That's it! The script will guide you through the process.
+
+**Note**: The old `nexus_downloader.py` is deprecated. Use `python -m src.main` instead.
 
 ## 📖 Examples
 
 ### Standard Mode
 ```bash
-python nexus_downloader.py
+python -m src.main
 ```
 Safe and reliable, closes each tab after download.
 
 ### Fast Mode (3x faster!)
 ```bash
-python nexus_downloader.py --no-auto-close
+python -m src.main --no-auto-close
 ```
 Opens up to 50 tabs, then closes them in batch. Much faster!
 
 ### Different Game (Skyrim)
 ```bash
-python nexus_downloader.py --game skyrimspecialedition
+python -m src.main --game skyrimspecialedition
 ```
 
 ### Custom Collection
 ```bash
-python nexus_downloader.py --collection my_mods.json
+python -m src.main --collection my_mods.json
 ```
 
 ### Optimized for Fast Connection
 ```bash
-python nexus_downloader.py --delay-click 1 --delay-download 4
+python -m src.main --delay-click 1 --delay-download 4
 ```
 
 ### Resume After Crash
 ```bash
-python nexus_downloader.py
+python -m src.main
 ```
 Automatically skips already downloaded mods!
 
 ## 🎛️ All Options
 
 ```bash
-python nexus_downloader.py --help
+python -m src.main --help
 ```
 
 | Option | Default | Description |
@@ -141,24 +143,24 @@ If the script crashes, just rerun it - it will skip already downloaded mods!
 
 To start fresh:
 ```bash
-python nexus_downloader.py --reset-progress
+python -m src.main --reset-progress
 ```
 
 ## ⚙️ Optimal Settings
 
 ### Fast Connection + SSD
 ```bash
-python nexus_downloader.py --delay-click 1 --delay-download 4 --no-auto-close
+python -m src.main --delay-click 1 --delay-download 4 --no-auto-close
 ```
 
 ### Normal Connection (Recommended)
 ```bash
-python nexus_downloader.py
+python -m src.main
 ```
 
 ### Slow Connection
 ```bash
-python nexus_downloader.py --delay-click 3 --delay-download 10
+python -m src.main --delay-click 3 --delay-download 10
 ```
 
 ## 🛠️ Troubleshooting
@@ -185,16 +187,26 @@ python nexus_downloader.py --delay-click 3 --delay-download 10
 
 ## 🏗️ Architecture
 
-Built with clean code and SOLID principles:
+Refactored with clean **Layered Architecture** and SOLID principles:
 
+### Layers
+- **Domain**: Pure business models (`ModSource`, `DownloaderConfig`)
+- **Infrastructure**: Technical adapters (file system, browser, input)
+- **Services**: Business logic orchestration (`DownloadOrchestrator`)
+- **Presentation**: CLI interface and console output
+- **Config**: Application settings and constants
+
+### Key Components
+- **DownloadOrchestrator**: Main service coordinating downloads
 - **ProgressTracker**: Progress management & crash recovery
 - **ClickRecorder**: Records user's manual click
 - **CollectionReader**: Parses collection JSON
 - **NexusUrlBuilder**: Builds download URLs
 - **BrowserController**: Browser automation
-- **NexusAutoDownloader**: Main orchestrator
 
-All functions ≤ 30 lines, fully documented.
+**One file per class**, fully documented with clear dependencies.
+
+See `ARCHITECTURE.md` for detailed documentation.
 
 ## 🤝 Contributing
 
