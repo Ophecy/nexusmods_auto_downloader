@@ -44,13 +44,18 @@ def main():
         progress_file=args.progress_file
     )
     
+    downloader = None
     try:
         downloader = DownloadOrchestrator(collection_file, config)
         downloader.execute()
     except KeyboardInterrupt:
         print("\n\n[STOP] Stopped by user")
+        if downloader:
+            downloader.keyboard_listener.stop()
     except Exception as e:
         print(f"\nError: {e}")
+        if downloader:
+            downloader.keyboard_listener.stop()
 
 
 def _print_instructions(args):
@@ -86,5 +91,8 @@ def _print_instructions(args):
     formatter.print_requirement("You are logged in to Nexus Mods")
     formatter.print_requirement("Your browser is in fullscreen")
     formatter.print_requirement("You don't move the window during process")
+    print()
+    print("Emergency stop:")
+    formatter.print_requirement("Press F4 at any time to stop the script immediately")
     formatter.print_separator()
     print()

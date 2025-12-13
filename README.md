@@ -183,6 +183,7 @@ python -m src.main --delay-click 3 --delay-download 10
 - You must be **logged in** to Nexus Mods
 - Keep **browser window visible** (not minimized)
 - Don't **move the browser** during the process
+- **Press F4 at any time** to stop the script immediately
 - Automation may violate Nexus Mods ToS - use at your own risk
 
 ## 🏗️ Architecture

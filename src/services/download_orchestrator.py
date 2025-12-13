@@ -14,6 +14,7 @@ from src.infrastructure.persistence.collection_reader import CollectionReader
 from src.infrastructure.persistence.progress_tracker import ProgressTracker
 from src.infrastructure.browser.browser_controller import BrowserController
 from src.infrastructure.input.click_recorder import ClickRecorder
+from src.infrastructure.input.keyboard_listener import KeyboardListener
 from src.services.url_builder import NexusUrlBuilder
 from src.config.settings import Settings
 
@@ -35,10 +36,14 @@ class DownloadOrchestrator:
         self.recorder = ClickRecorder()
         self.browser = BrowserController()
         self.tracker = ProgressTracker(config.progress_file)
+        self.keyboard_listener = KeyboardListener()
         self.click_position: Optional[tuple] = None
     
     def execute(self):
         """Execute the download automation."""
+        self.keyboard_listener.start()
+        print("Press F4 at any time to stop the script\n")
+        
         all_mods = self.reader.read_mods()
         total = len(all_mods)
         
@@ -70,6 +75,10 @@ class DownloadOrchestrator:
         print("="*60 + "\n")
         
         for idx, source in enumerate(mod_sources[1:], start=2):
+            if self.keyboard_listener.check_should_stop():
+                print("\nStopping as requested...")
+                break
+            
             self._process_mod(source, idx + downloaded, total)
             self.tracker.mark_downloaded(source)
             
@@ -79,6 +88,7 @@ class DownloadOrchestrator:
         if not self.config.auto_close and len(mod_sources) > 1:
             self._close_all_tabs_batch()
         
+        self.keyboard_listener.stop()
         print(f"\nAll downloads initiated!")
         print(f"\nProgress file: {self.config.progress_file}")
     
@@ -137,14 +147,23 @@ class DownloadOrchestrator:
     
     def _process_mod(self, mod_source: ModSource, index: int, total: int):
         """Process a single mod download."""
+        if self.keyboard_listener.check_should_stop():
+            return
+        
         print(f"[{index}/{total}] Mod {mod_source.mod_id} "
               f"(File {mod_source.file_id})")
         
         url = self.url_builder.build_download_url(mod_source)
         webbrowser.open(url)
         
+        if self.keyboard_listener.check_should_stop():
+            return
+        
         print(f"  Loading...")
         time.sleep(self.config.delay_before_click)
+        
+        if self.keyboard_listener.check_should_stop():
+            return
         
         print(f"  Clicking at {self.click_position}")
         x, y = self.click_position
