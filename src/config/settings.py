@@ -23,7 +23,13 @@ class Settings:
     
     # Default game
     DEFAULT_GAME_DOMAIN = "cyberpunk2077"
-    
+
+    # Template matching
+    DEFAULT_TEMPLATE_PATH = "templates/slow_download_button.png"
+    DEFAULT_DETECTION_CONFIDENCE = 0.8
+    DEFAULT_TEMPLATE_WIDTH = 200
+    DEFAULT_TEMPLATE_HEIGHT = 100
+
     # Browser reopening delay after batch close
     BROWSER_REOPEN_DELAY = 5.0
 

@@ -17,3 +17,6 @@ class DownloaderConfig:
     progress_file: str = "downloaded_mods.txt"
     force_focus: bool = False
     batch_size: int = 50
+    use_auto_detection: bool = False
+    template_path: str = "templates/slow_download_button.png"
+    detection_confidence: float = 0.8

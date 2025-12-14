@@ -96,4 +96,23 @@ def parse_arguments():
         help=f'Number of tabs to open before purge in batch mode (default: {Settings.BATCH_SIZE})'
     )
 
+    parser.add_argument(
+        '--auto-detect',
+        action='store_true',
+        help='Use automatic button detection (OpenCV template matching)'
+    )
+
+    parser.add_argument(
+        '--template-path',
+        default=Settings.DEFAULT_TEMPLATE_PATH,
+        help=f'Path to button template image (default: {Settings.DEFAULT_TEMPLATE_PATH})'
+    )
+
+    parser.add_argument(
+        '--detection-confidence',
+        type=float,
+        default=Settings.DEFAULT_DETECTION_CONFIDENCE,
+        help=f'Confidence threshold for detection 0-1 (default: {Settings.DEFAULT_DETECTION_CONFIDENCE})'
+    )
+
     return parser.parse_args()

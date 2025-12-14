@@ -44,6 +44,9 @@ def main():
         progress_file=args.progress_file,
         force_focus=args.force_focus,
         batch_size=args.batch_size,
+        use_auto_detection=args.auto_detect,
+        template_path=args.template_path,
+        detection_confidence=args.detection_confidence
     )
     
     downloader = None
@@ -87,6 +90,12 @@ def _print_instructions(args):
         formatter.print_config_item("Auto-close", f"No (batch of {args.batch_size})")
         formatter.print_requirement(f"  -> Tabs stay open then closed every {args.batch_size} mods")
         formatter.print_requirement(f"  -> Faster but opens up to {args.batch_size} tabs")
+
+    if args.auto_detect:
+        formatter.print_config_item("Auto-detection", "Enabled")
+        formatter.print_config_item("Template path", args.template_path)
+        formatter.print_config_item("Confidence", f"{args.detection_confidence:.0%}")
+
     print()
     print("Make sure:")
     formatter.print_requirement("You are logged in to Nexus Mods")

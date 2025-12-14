@@ -15,6 +15,7 @@ from src.infrastructure.persistence.progress_tracker import ProgressTracker
 from src.infrastructure.browser.browser_controller import BrowserController
 from src.infrastructure.input.click_recorder import ClickRecorder
 from src.infrastructure.input.keyboard_listener import KeyboardListener
+from src.infrastructure.vision.button_detector import ButtonDetector
 from src.services.url_builder import NexusUrlBuilder
 from src.config.settings import Settings
 
@@ -39,6 +40,30 @@ class DownloadOrchestrator:
         self.keyboard_listener = KeyboardListener()
         self.click_position: Optional[tuple] = None
         self.current_batch_count = 0
+        self.detector = None
+        if config.use_auto_detection:
+            normal_template = Path(config.template_path)
+            hover_template = normal_template.parent / f"{normal_template.stem}_hover{normal_template.suffix}"
+
+            missing = []
+            if not normal_template.exists():
+                missing.append(f"  ✗ {normal_template} (normal)")
+            if not hover_template.exists():
+                missing.append(f"  ✗ {hover_template} (hover)")
+
+            if missing:
+                raise FileNotFoundError(
+                    f"Auto-detection is enabled but required template files are missing:\n\n"
+                    f"Missing files:\n" + "\n".join(missing) + "\n\n"
+                    f"Please:\n"
+                    f"1. Capture both button templates (normal and hover states), OR\n"
+                    f"2. Disable auto-detection (remove --auto-detect flag)"
+                )
+
+            self.detector = ButtonDetector(
+                template_path=config.template_path,
+                confidence_threshold=config.detection_confidence
+            )
 
     def execute(self):
         """Execute the download automation."""
@@ -129,11 +154,18 @@ class DownloadOrchestrator:
         if not self.click_position:
             print("No click recorded")
             return False
-        
-        print("\nClosing tab...")
-        self.browser.close_current_tab()
-        time.sleep(1)
-        
+
+        if self.config.use_auto_detection and self.detector:
+            print("\nCapturing button template for auto-detection...")
+            success = self.detector.capture_template(self.click_position)
+            if success:
+                print(f"Template saved to: {self.config.template_path}")
+            else:
+                print("Warning: Failed to capture template. Will use manual coordinates.")
+
+        print("\nClick recorded! Keeping tab open for download...")
+        self.current_batch_count = 1  # First mod counts in the batch
+
         return True
     
     def _close_all_tabs_batch(self):
@@ -149,13 +181,28 @@ class DownloadOrchestrator:
 
         print("Base tab still open, ready to continue...")
         time.sleep(1)
-        webbrowser.open(Settings.NEXUS_BASE_URL)
-        
-        print(f"Waiting for browser to be ready ({Settings.BROWSER_REOPEN_DELAY}s)...")
-        time.sleep(Settings.BROWSER_REOPEN_DELAY)
-        
-        print("Browser ready, resuming...\n")
-    
+
+        # Reset counter for next batch
+        self.current_batch_count = 0
+        print()
+
+    def _get_click_position(self) -> Optional[tuple]:
+        """
+        Determine click position using auto-detection or fallback.
+
+        Returns:
+            (x, y) coordinates or None if unavailable
+        """
+        if self.config.use_auto_detection and self.detector:
+            detected = self.detector.detect_button()
+            if detected:
+                print(f"  Auto-detected at {detected}")
+                return detected
+            else:
+                print(f"  Detection failed, using recorded coordinates")
+
+        return self.click_position
+
     def _process_mod(self, mod_source: ModSource, index: int, total: int):
         """Process a single mod download."""
         if self.keyboard_listener.check_should_stop():
@@ -175,9 +222,19 @@ class DownloadOrchestrator:
         
         if self.keyboard_listener.check_should_stop():
             return
-        
-        print(f"  Clicking at {self.click_position}")
-        x, y = self.click_position
+
+        click_position = self._get_click_position()
+
+        if not click_position:
+            print("  ERROR: Could not determine click position, skipping...")
+            return
+
+        print(f"  Clicking at {click_position}")
+
+        if self.config.force_focus:
+            self.browser.focus_browser()
+
+        x, y = click_position
         pyautogui.click(x, y)
         
         if self.config.auto_close:

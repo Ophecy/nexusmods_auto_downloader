@@ -5,7 +5,8 @@
 ## ✨ Features
 
 - 🎯 **One-Click Learning**: Click once, auto-download hundreds of mods
-- 🔄 **Crash Recovery**: Automatically resume from where you left off  
+- 🤖 **Smart Auto-Detection**: Automatic button detection with dual-template matching (normal + hover states)
+- 🔄 **Crash Recovery**: Automatically resume from where you left off
 - ⚡ **Batch Processing**: Fast mode handles up to 50 tabs at once
 - 🎮 **Multi-Game Support**: Works with any game on Nexus Mods
 - ⚙️ **Highly Configurable**: Adjust all delays and behaviors
@@ -14,11 +15,18 @@
 
 ## 🎥 How It Works
 
+### Standard Mode (Coordinate-Based)
 1. Run the script
 2. First page opens automatically
 3. **You click** on the "SLOW DOWNLOAD" button
 4. Script records your click coordinates
 5. All subsequent mods download automatically!
+
+### Auto-Detection Mode (Recommended)
+1. Place button templates in `templates/` folder
+2. Run with `--auto-detect` flag
+3. Script automatically finds and clicks the button
+4. Works even if button position changes!
 
 ## 🚀 Quick Start
 
@@ -81,25 +89,34 @@ python -m src.main --force-focus
 ```
 Forces browser to foreground before each click. Use if other windows appear on top.
 
+### Auto-Detection Mode
+```bash
+python -m src.main --auto-detect
+```
+Automatically detects the "SLOW DOWNLOAD" button using template matching. Requires button templates in `templates/` folder.
+
 ## 🎛️ All Options
 
 ```bash
 python -m src.main --help
 ```
 
-| Option             | Default               | Description                       |
-|--------------------|-----------------------|-----------------------------------|
-| `--collection`     | `collection.json`     | Collection file to use            |
-| `--progress-file`  | `downloaded_mods.txt` | Progress tracking file            |
-| `--no-auto-close`  | `False`               | Fast mode (batch close every 50)  |
-| `--reset-progress` | -                     | Clear progress file               |
-| `--delay-click`    | `2.0`                 | Delay before clicking (seconds)   |
-| `--delay-download` | `6.0`                 | Wait for download start (seconds) |
-| `--delay-between`  | `0.5`                 | Delay between mods (seconds)      |
-| `--game`           | `cyberpunk2077`       | Game domain on Nexus Mods         |
-| `--force-focus`    | `False`               | Force browser focus before clicks |
-| `--batch-size`     | `100`                 | Force browser focus before clicks |
-| `-y, --yes`        | `False`               | Skip confirmation prompt          |
+| Option                  | Default                          | Description                              |
+|-------------------------|----------------------------------|------------------------------------------|
+| `--collection`          | `collection.json`                | Collection file to use                   |
+| `--progress-file`       | `downloaded_mods.txt`            | Progress tracking file                   |
+| `--no-auto-close`       | `False`                          | Fast mode (batch close every 50)         |
+| `--reset-progress`      | -                                | Clear progress file                      |
+| `--delay-click`         | `2.0`                            | Delay before clicking (seconds)          |
+| `--delay-download`      | `6.0`                            | Wait for download start (seconds)        |
+| `--delay-between`       | `0.5`                            | Delay between mods (seconds)             |
+| `--game`                | `cyberpunk2077`                  | Game domain on Nexus Mods                |
+| `--force-focus`         | `False`                          | Force browser focus before clicks        |
+| `--batch-size`          | `100`                            | Tabs per batch in fast mode              |
+| `--auto-detect`         | `False`                          | Enable automatic button detection        |
+| `--template-path`       | `templates/slow_download_button.png` | Path to button template image        |
+| `--detection-confidence`| `0.8`                            | Confidence threshold for detection (0-1) |
+| `-y, --yes`             | `False`                          | Skip confirmation prompt                 |
 
 ## 📊 Performance
 
@@ -117,6 +134,49 @@ Works with **any game** on Nexus Mods!
 Examples: `cyberpunk2077`, `skyrimspecialedition`, `fallout4`, `witcher3`, `starfield`, `newvegas`, and many more.
 
 Just use the domain from the URL: `nexusmods.com/{game-domain}/mods/...`
+
+## 🤖 Auto-Detection Setup
+
+The auto-detection feature uses template matching to automatically find and click the "SLOW DOWNLOAD" button.
+
+### Setting Up Templates
+
+1. **Capture button screenshots**:
+   - Navigate to any Nexus Mods download page
+   - Take a screenshot of the "SLOW DOWNLOAD" button in **normal state** (not hovered)
+   - Hover over the button and take another screenshot in **hover state**
+
+2. **Prepare template images**:
+   - Crop both screenshots to show only the button (approximately 200x100 pixels)
+   - Save as PNG files in the `templates/` folder:
+     - `slow_download_button.png` (normal state)
+     - `slow_download_button_hover.png` (hover state)
+
+3. **Run with auto-detection**:
+   ```bash
+   python -m src.main --auto-detect
+   ```
+
+### Template Requirements
+
+- Both templates must exist for auto-detection to work
+- Use the same button state for all templates (don't mix different pages)
+- Templates are automatically protected from being overwritten
+- Works across different screen resolutions
+
+### Adjusting Detection Sensitivity
+
+If the button is not detected reliably:
+
+```bash
+# Lower confidence threshold (0.7 = 70% match required)
+python -m src.main --auto-detect --detection-confidence 0.7
+
+# Higher confidence (0.9 = 90% match required)
+python -m src.main --auto-detect --detection-confidence 0.9
+```
+
+**Tip**: Start with 0.8 (default) and lower it to 0.7 if detection fails.
 
 ## 📁 Collection File
 
@@ -181,6 +241,7 @@ python -m src.main --delay-click 3 --delay-download 10
 - Keep browser in fullscreen
 - Don't move window during process
 - Increase `--delay-click` if page loads slowly
+- Consider using `--auto-detect` for automatic detection
 
 **Downloads not starting?**
 - Increase `--delay-download` to 8 or 10
@@ -190,6 +251,14 @@ python -m src.main --delay-click 3 --delay-download 10
 - Use `--force-focus` to bring browser to foreground before each click
 - Other windows (notifications, popups) might be appearing on top
 - Ensure browser stays visible and not minimized
+- Use `--auto-detect` for automatic button location
+
+**Auto-detection not working?**
+- Ensure both template files exist in `templates/`:
+  - `slow_download_button.png` (normal state)
+  - `slow_download_button_hover.png` (hover state)
+- Lower `--detection-confidence` to 0.7 if button not detected
+- Check templates were captured from the correct button state
 
 ## ⚠️ Important
 
@@ -214,6 +283,7 @@ Refactored with clean **Layered Architecture** and SOLID principles:
 - **DownloadOrchestrator**: Main service coordinating downloads
 - **ProgressTracker**: Progress management & crash recovery
 - **ClickRecorder**: Records user's manual click
+- **ButtonDetector**: Automatic button detection with dual-template matching
 - **CollectionReader**: Parses collection JSON
 - **NexusUrlBuilder**: Builds download URLs
 - **BrowserController**: Browser automation
@@ -241,10 +311,12 @@ See [LICENSE](LICENSE) file for full details.
 
 ## 💡 Tips
 
-1. Test with a small collection first (5-10 mods)
-2. Use `--no-auto-close` for large collections (much faster)
-3. Check your browser's download settings
-4. Consider a Nexus Premium account for faster downloads
+1. **Use auto-detection** (`--auto-detect`) for better reliability if button position changes
+2. Test with a small collection first (5-10 mods)
+3. Use `--no-auto-close` for large collections (much faster)
+4. Combine auto-detection with fast mode: `--auto-detect --no-auto-close`
+5. Check your browser's download settings
+6. Consider a Nexus Premium account for faster downloads
 
 ## 🔮 Future Features
 
@@ -252,7 +324,7 @@ See [LICENSE](LICENSE) file for full details.
 
 #### User Experience
 - 🖥️ **Graphical Interface (GUI)**: PyQt5/Tkinter interface with real-time progress visualization
-- 🤖 **Automatic Button Detection**: OCR/image detection to eliminate manual click recording
+- ✅ ~~**Automatic Button Detection**~~: **IMPLEMENTED** - Dual-template matching (normal + hover states)
 - 🔔 **Notifications**: Desktop notifications, Discord webhooks, and email alerts
 - ⏸️ **Pause/Resume**: Keyboard shortcuts to pause and resume downloads
 - 🧪 **Dry-Run Mode**: Preview what would be downloaded without actually downloading
@@ -293,7 +365,7 @@ See [LICENSE](LICENSE) file for full details.
 
 **Phase 2 - User Experience** (1 month)
 - Basic GUI (Tkinter)
-- Automatic button detection (OCR)
+- ✅ ~~Automatic button detection~~ **COMPLETED**
 - Desktop notifications
 - Pause/resume functionality
 
