@@ -26,6 +26,6 @@ class Settings:
     
     # Browser reopening delay after batch close
     BROWSER_REOPEN_DELAY = 5.0
-    
+
     # Tab close delay
     TAB_CLOSE_DELAY = 0.3

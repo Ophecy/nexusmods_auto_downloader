@@ -82,5 +82,18 @@ def parse_arguments():
         action='store_true',
         help='Skip confirmation prompt'
     )
-    
+
+    parser.add_argument(
+        '--force-focus',
+        action='store_true',
+        help='Force browser focus before each click (use if other windows appear on top)'
+    )
+
+    parser.add_argument(
+        '--batch-size',
+        type=int,
+        default=Settings.BATCH_SIZE,
+        help=f'Number of tabs to open before purge in batch mode (default: {Settings.BATCH_SIZE})'
+    )
+
     return parser.parse_args()

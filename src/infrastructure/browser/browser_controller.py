@@ -27,10 +27,18 @@ class BrowserController:
     def close_tabs_batch(count: int):
         """
         Close multiple tabs one by one.
-        
+
         Args:
             count: Number of tabs to close
         """
         for _ in range(count):
             pyautogui.hotkey('ctrl', 'w')
             time.sleep(0.1)
+
+    @staticmethod
+    def focus_browser():
+        """Bring browser to foreground by opening and closing a dummy tab."""
+        import webbrowser
+        webbrowser.open("https://www.nexusmods.com")
+        time.sleep(0.1)
+        BrowserController.close_current_tab()

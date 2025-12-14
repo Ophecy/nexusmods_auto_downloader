@@ -25,7 +25,7 @@ class DownloadOrchestrator:
     def __init__(self, collection_file: Path, config: DownloaderConfig):
         """
         Initialize the download orchestrator.
-        
+
         Args:
             collection_file: Path to collection JSON file
             config: Downloader configuration
@@ -38,32 +38,39 @@ class DownloadOrchestrator:
         self.tracker = ProgressTracker(config.progress_file)
         self.keyboard_listener = KeyboardListener()
         self.click_position: Optional[tuple] = None
-    
+        self.current_batch_count = 0
+
     def execute(self):
         """Execute the download automation."""
         self.keyboard_listener.start()
         print("Press F4 at any time to stop the script\n")
-        
+
         all_mods = self.reader.read_mods()
         total = len(all_mods)
-        
+
         if total == 0:
             print("No mods found in collection file")
             return
-        
+
         mod_sources = [
-            mod for mod in all_mods 
+            mod for mod in all_mods
             if not self.tracker.is_downloaded(mod)
         ]
-        
+
         downloaded, remaining = self.tracker.get_stats(total)
-        
+
         self._print_header(total, downloaded, remaining)
-        
+
         if remaining == 0:
             print("All mods already downloaded!")
             return
-        
+
+        # Open a base tab that will stay open throughout the process
+        print("Opening base browser tab...")
+        webbrowser.open(Settings.NEXUS_BASE_URL)
+        time.sleep(2)
+        print()
+
         first_mod = mod_sources[0]
         if not self._record_first_click(first_mod):
             return
@@ -81,11 +88,11 @@ class DownloadOrchestrator:
             
             self._process_mod(source, idx + downloaded, total)
             self.tracker.mark_downloaded(source)
-            
-            if not self.config.auto_close and idx % Settings.BATCH_SIZE == 0:
+
+            if not self.config.auto_close and idx % self.config.batch_size == 0:
                 self._close_all_tabs_batch()
         
-        if not self.config.auto_close and len(mod_sources) > 1:
+        if not self.config.auto_close and self.current_batch_count > 0:
             self._close_all_tabs_batch()
         
         self.keyboard_listener.stop()
@@ -112,9 +119,13 @@ class DownloadOrchestrator:
         
         print("Waiting for page to load...")
         time.sleep(self.config.delay_before_click)
-        
+
+        if self.config.force_focus:
+            print("Ensuring browser has focus...")
+            self.browser.focus_browser()
+
         self.click_position = self.recorder.record_click()
-        
+
         if not self.click_position:
             print("No click recorded")
             return False
@@ -126,17 +137,17 @@ class DownloadOrchestrator:
         return True
     
     def _close_all_tabs_batch(self):
-        """Close all accumulated tabs and restart browser."""
+        """Close all accumulated tabs from current batch."""
         print("\n" + "="*60)
-        print("PAUSE - Closing accumulated tabs")
+        print(f"PAUSE - Closing {self.current_batch_count} tabs from this batch")
         print("="*60)
         print("Waiting for downloads to start...")
         time.sleep(self.config.delay_for_download)
-        
-        print("Closing all tabs (Ctrl+W for each)...")
-        self.browser.close_tabs_batch(Settings.BATCH_SIZE)
-        
-        print("Reopening browser...")
+
+        print(f"Closing {self.current_batch_count} tabs (Ctrl+W for each)...")
+        self.browser.close_tabs_batch(self.current_batch_count)
+
+        print("Base tab still open, ready to continue...")
         time.sleep(1)
         webbrowser.open(Settings.NEXUS_BASE_URL)
         
@@ -172,5 +183,8 @@ class DownloadOrchestrator:
         if self.config.auto_close:
             time.sleep(self.config.delay_for_download)
             self.browser.close_current_tab()
-        
+        else:
+            # In batch mode, track the tab count
+            self.current_batch_count += 1
+
         time.sleep(self.config.delay_between_mods)

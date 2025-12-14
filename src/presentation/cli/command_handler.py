@@ -41,7 +41,9 @@ def main():
         delay_for_download=args.delay_download,
         delay_between_mods=args.delay_between,
         auto_close=not args.no_auto_close,
-        progress_file=args.progress_file
+        progress_file=args.progress_file,
+        force_focus=args.force_focus,
+        batch_size=args.batch_size,
     )
     
     downloader = None
@@ -82,10 +84,9 @@ def _print_instructions(args):
         formatter.print_config_item("Auto-close", f"Yes (waits {args.delay_download}s before closing)")
         formatter.print_requirement("  -> Waits for download to start before closing tab")
     else:
-        formatter.print_config_item("Auto-close", f"No (batch of {Settings.BATCH_SIZE})")
-        formatter.print_requirement("  -> Tabs stay open then closed every 50 mods")
-        formatter.print_requirement(f"  -> Faster but opens up to {Settings.BATCH_SIZE} tabs")
-    
+        formatter.print_config_item("Auto-close", f"No (batch of {args.batch_size})")
+        formatter.print_requirement(f"  -> Tabs stay open then closed every {args.batch_size} mods")
+        formatter.print_requirement(f"  -> Faster but opens up to {args.batch_size} tabs")
     print()
     print("Make sure:")
     formatter.print_requirement("You are logged in to Nexus Mods")

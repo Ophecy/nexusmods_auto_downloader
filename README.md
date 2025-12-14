@@ -75,30 +75,38 @@ python -m src.main
 ```
 Automatically skips already downloaded mods!
 
+### Force Browser Focus
+```bash
+python -m src.main --force-focus
+```
+Forces browser to foreground before each click. Use if other windows appear on top.
+
 ## 🎛️ All Options
 
 ```bash
 python -m src.main --help
 ```
 
-| Option | Default | Description |
-|--------|---------|-------------|
-| `--collection` | `collection.json` | Collection file to use |
-| `--progress-file` | `downloaded_mods.txt` | Progress tracking file |
-| `--no-auto-close` | `False` | Fast mode (batch close every 50) |
-| `--reset-progress` | - | Clear progress file |
-| `--delay-click` | `2.0` | Delay before clicking (seconds) |
-| `--delay-download` | `6.0` | Wait for download start (seconds) |
-| `--delay-between` | `0.5` | Delay between mods (seconds) |
-| `--game` | `cyberpunk2077` | Game domain on Nexus Mods |
-| `-y, --yes` | `False` | Skip confirmation prompt |
+| Option             | Default               | Description                       |
+|--------------------|-----------------------|-----------------------------------|
+| `--collection`     | `collection.json`     | Collection file to use            |
+| `--progress-file`  | `downloaded_mods.txt` | Progress tracking file            |
+| `--no-auto-close`  | `False`               | Fast mode (batch close every 50)  |
+| `--reset-progress` | -                     | Clear progress file               |
+| `--delay-click`    | `2.0`                 | Delay before clicking (seconds)   |
+| `--delay-download` | `6.0`                 | Wait for download start (seconds) |
+| `--delay-between`  | `0.5`                 | Delay between mods (seconds)      |
+| `--game`           | `cyberpunk2077`       | Game domain on Nexus Mods         |
+| `--force-focus`    | `False`               | Force browser focus before clicks |
+| `--batch-size`     | `100`                 | Force browser focus before clicks |
+| `-y, --yes`        | `False`               | Skip confirmation prompt          |
 
 ## 📊 Performance
 
-| Mode | Speed | 300 Mods |
-|------|-------|----------|
-| Standard | ~8.5s/mod | ~42 min |
-| Fast (`--no-auto-close`) | ~2.5s/mod | ~14 min |
+| Mode                     | Speed     | 300 Mods |
+|--------------------------|-----------|----------|
+| Standard                 | ~8.5s/mod | ~42 min  |
+| Fast (`--no-auto-close`) | ~2.5s/mod | ~14 min  |
 
 **Fast mode is 3x faster!** ⚡
 
@@ -177,6 +185,11 @@ python -m src.main --delay-click 3 --delay-download 10
 **Downloads not starting?**
 - Increase `--delay-download` to 8 or 10
 - Check you're logged in to Nexus Mods
+
+**Clicks missing the target?**
+- Use `--force-focus` to bring browser to foreground before each click
+- Other windows (notifications, popups) might be appearing on top
+- Ensure browser stays visible and not minimized
 
 ## ⚠️ Important
 
