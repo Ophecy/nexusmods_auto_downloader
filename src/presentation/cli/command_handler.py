@@ -11,16 +11,26 @@ from src.presentation.console.formatter import ConsoleFormatter
 from src.config.settings import Settings
 
 
+_FAST_PRESETS = {
+    'no_auto_close': True,
+    'delay_click': Settings.FAST_DELAY_CLICK,
+    'delay_download': Settings.FAST_DELAY_DOWNLOAD,
+    'delay_between': Settings.FAST_DELAY_BETWEEN,
+}
+
+
 def main():
     """Main entry point for the application."""
     args = parse_arguments()
-    
+    _apply_fast_mode(args)
+    _apply_defaults(args)
+
     collection_file = Path(args.collection)
-    
+
     if not collection_file.exists():
         print(f"Error: {collection_file} not found")
         return
-    
+
     if args.reset_progress:
         progress_file = Path(args.progress_file)
         if progress_file.exists():
@@ -29,12 +39,12 @@ def main():
         else:
             print(f"No progress file to delete")
         return
-    
+
     _print_instructions(args)
-    
+
     if not args.yes:
         input("Press ENTER to continue...")
-    
+
     config = DownloaderConfig(
         game_domain=args.game,
         delay_before_click=args.delay_click,
@@ -48,7 +58,7 @@ def main():
         template_path=args.template_path,
         detection_confidence=args.detection_confidence
     )
-    
+
     downloader = None
     try:
         downloader = DownloadOrchestrator(collection_file, config)
@@ -63,13 +73,32 @@ def main():
             downloader.keyboard_listener.stop()
 
 
+def _apply_fast_mode(args):
+    if not args.fast:
+        return
+    for attr, fast_value in _FAST_PRESETS.items():
+        if getattr(args, attr) is None:
+            setattr(args, attr, fast_value)
+
+
+def _apply_defaults(args):
+    if args.no_auto_close is None:
+        args.no_auto_close = False
+    if args.delay_click is None:
+        args.delay_click = Settings.DEFAULT_DELAY_BEFORE_CLICK
+    if args.delay_download is None:
+        args.delay_download = Settings.DEFAULT_DELAY_FOR_DOWNLOAD
+    if args.delay_between is None:
+        args.delay_between = Settings.DEFAULT_DELAY_BETWEEN_MODS
+
+
 def _print_instructions(args):
     """Print usage instructions."""
     formatter = ConsoleFormatter()
-    
+
     formatter.print_header("NEXUS AUTO-DOWNLOADER")
     print()
-    
+
     print("How it works:")
     formatter.print_requirement("1. First page opens")
     formatter.print_requirement("2. YOU click on 'SLOW DOWNLOAD' button")
@@ -77,12 +106,12 @@ def _print_instructions(args):
     formatter.print_requirement("4. Script automatically clicks at same position")
     formatter.print_requirement("   on all following pages")
     print()
-    
+
     print("Configuration:")
     formatter.print_config_item("Collection", args.collection)
     formatter.print_config_item("Progress", args.progress_file)
     formatter.print_config_item("Click delay", f"{args.delay_click}s")
-    
+
     if not args.no_auto_close:
         formatter.print_config_item("Auto-close", f"Yes (waits {args.delay_download}s before closing)")
         formatter.print_requirement("  -> Waits for download to start before closing tab")

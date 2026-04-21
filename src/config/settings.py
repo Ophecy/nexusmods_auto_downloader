@@ -35,3 +35,8 @@ class Settings:
 
     # Tab close delay
     TAB_CLOSE_DELAY = 0.3
+
+    # Fast mode presets
+    FAST_DELAY_CLICK = 1.0
+    FAST_DELAY_DOWNLOAD = 5.0 # incompressible
+    FAST_DELAY_BETWEEN = 0.1
