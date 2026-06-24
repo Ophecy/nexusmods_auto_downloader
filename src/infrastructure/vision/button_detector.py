@@ -115,13 +115,14 @@ class ButtonDetector:
             print(f"Warning: Button detection failed: {e}")
             return None
 
-    def capture_template(self, click_position: tuple, region_size: tuple = (200, 100)) -> bool:
+    def capture_template(self, click_position: tuple, region_size: tuple = (200, 100), screenshot=None) -> bool:
         """
         Capture button template from screen at click position.
 
         Args:
             click_position: (x, y) where user clicked
             region_size: (width, height) of region to capture around click
+            screenshot: pre-captured PIL Image to extract from (avoids recapturing after UI changes)
 
         Returns:
             True if template saved successfully, False otherwise
@@ -137,13 +138,15 @@ class ButtonDetector:
 
             x, y = click_position
             width, height = region_size
-
             left = max(0, x - width // 2)
             top = max(0, y - height // 2)
 
-            screenshot = pyautogui.screenshot(region=(left, top, width, height))
-            screenshot.save(self.template_path)
+            if screenshot is not None:
+                region = screenshot.crop((left, top, left + width, top + height))
+            else:
+                region = pyautogui.screenshot(region=(left, top, width, height))
 
+            region.save(self.template_path)
             self._load_templates()
 
             return True

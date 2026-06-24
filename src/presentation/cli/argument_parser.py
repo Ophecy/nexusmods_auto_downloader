@@ -25,6 +25,8 @@ def parse_arguments():
   python main.py --reset-progress
   python main.py --fast
   python main.py --fast -C 3
+  python main.py --vortex
+  python main.py --vortex --vortex-template templates/my_vortex_btn.png
         """
     )
 
@@ -126,6 +128,18 @@ def parse_arguments():
             f'--delay-download {Settings.FAST_DELAY_DOWNLOAD}, --delay-between {Settings.FAST_DELAY_BETWEEN}. '
             'Explicit values override this preset.'
         )
+    )
+
+    parser.add_argument(
+        '--vortex', '-V',
+        action='store_true',
+        help='Mode Vortex: surveille le bouton Vortex et clique automatiquement sur les deux boutons (sans collection)'
+    )
+
+    parser.add_argument(
+        '--vortex-template',
+        default=Settings.DEFAULT_VORTEX_TEMPLATE_PATH,
+        help=f'Chemin vers le template du bouton Vortex (default: {Settings.DEFAULT_VORTEX_TEMPLATE_PATH})'
     )
 
     return parser.parse_args()

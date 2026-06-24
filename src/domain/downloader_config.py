@@ -20,3 +20,6 @@ class DownloaderConfig:
     use_auto_detection: bool = False
     template_path: str = "templates/slow_download_button.png"
     detection_confidence: float = 0.8
+    vortex_mode: bool = False
+    vortex_template_path: str = "templates/vortex_download_button.png"
+    vortex_scan_interval: float = 0.6

@@ -97,22 +97,22 @@ class DownloadOrchestrator:
         print()
 
         first_mod = mod_sources[0]
-        if not self._record_first_click(first_mod):
+        if not self._record_first_click(first_mod, downloaded + 1, total):
             return
-        
+
         self.tracker.mark_downloaded(first_mod)
-        
+
         print("\n" + "="*60)
         print("Starting automatic downloads...")
         print("="*60 + "\n")
-        
+
         for idx, source in enumerate(mod_sources[1:], start=2):
             if self.keyboard_listener.check_should_stop():
                 print("\nStopping as requested...")
                 break
-            
-            self._process_mod(source, idx + downloaded, total)
-            self.tracker.mark_downloaded(source)
+
+            if self._process_mod(source, idx + downloaded, total):
+                self.tracker.mark_downloaded(source)
 
             if not self.config.auto_close and idx % self.config.batch_size == 0:
                 self._close_all_tabs_batch()
@@ -134,20 +134,22 @@ class DownloadOrchestrator:
         print(f"Remaining: {remaining}")
         print(f"{'='*60}\n")
     
-    def _record_first_click(self, mod_source: ModSource) -> bool:
+    def _record_first_click(self, mod_source: ModSource, index: int, total: int) -> bool:
         """Record user's click on the first mod."""
-        print(f"[1/...] First mod")
+        print(f"[{index}/{total}] First mod")
         print(f"Mod ID: {mod_source.mod_id}, File ID: {mod_source.file_id}\n")
-        
+
         url = self.url_builder.build_download_url(mod_source)
         webbrowser.open(url)
-        
+
         print("Waiting for page to load...")
         time.sleep(self.config.delay_before_click)
 
         if self.config.force_focus:
             print("Ensuring browser has focus...")
             self.browser.focus_browser()
+
+        pre_click_screenshot = pyautogui.screenshot() if self.config.use_auto_detection and self.detector else None
 
         self.click_position = self.recorder.record_click()
 
@@ -157,14 +159,14 @@ class DownloadOrchestrator:
 
         if self.config.use_auto_detection and self.detector:
             print("\nCapturing button template for auto-detection...")
-            success = self.detector.capture_template(self.click_position)
+            success = self.detector.capture_template(self.click_position, screenshot=pre_click_screenshot)
             if success:
                 print(f"Template saved to: {self.config.template_path}")
             else:
                 print("Warning: Failed to capture template. Will use manual coordinates.")
 
         print("\nClick recorded! Keeping tab open for download...")
-        self.current_batch_count = 1  # First mod counts in the batch
+        self.current_batch_count = 1
 
         return True
     
@@ -203,31 +205,31 @@ class DownloadOrchestrator:
 
         return self.click_position
 
-    def _process_mod(self, mod_source: ModSource, index: int, total: int):
-        """Process a single mod download."""
+    def _process_mod(self, mod_source: ModSource, index: int, total: int) -> bool:
+        """Process a single mod download. Returns True if click was performed."""
         if self.keyboard_listener.check_should_stop():
-            return
-        
+            return False
+
         print(f"[{index}/{total}] Mod {mod_source.mod_id} "
               f"(File {mod_source.file_id})")
-        
+
         url = self.url_builder.build_download_url(mod_source)
         webbrowser.open(url)
-        
+
         if self.keyboard_listener.check_should_stop():
-            return
-        
+            return False
+
         print(f"  Loading...")
         time.sleep(self.config.delay_before_click)
-        
+
         if self.keyboard_listener.check_should_stop():
-            return
+            return False
 
         click_position = self._get_click_position()
 
         if not click_position:
             print("  ERROR: Could not determine click position, skipping...")
-            return
+            return False
 
         print(f"  Clicking at {click_position}")
 
@@ -236,12 +238,12 @@ class DownloadOrchestrator:
 
         x, y = click_position
         pyautogui.click(x, y)
-        
+
         if self.config.auto_close:
             time.sleep(self.config.delay_for_download)
             self.browser.close_current_tab()
         else:
-            # In batch mode, track the tab count
             self.current_batch_count += 1
 
         time.sleep(self.config.delay_between_mods)
+        return True

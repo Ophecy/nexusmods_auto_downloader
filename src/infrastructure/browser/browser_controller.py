@@ -40,5 +40,5 @@ class BrowserController:
         """Bring browser to foreground by opening and closing a dummy tab."""
         import webbrowser
         webbrowser.open("https://www.nexusmods.com")
-        time.sleep(0.1)
+        time.sleep(0.5)
         BrowserController.close_current_tab()

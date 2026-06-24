@@ -6,6 +6,7 @@ from pathlib import Path
 
 from src.domain.downloader_config import DownloaderConfig
 from src.services.download_orchestrator import DownloadOrchestrator
+from src.services.vortex_orchestrator import VortexOrchestrator
 from src.presentation.cli.argument_parser import parse_arguments
 from src.presentation.console.formatter import ConsoleFormatter
 from src.config.settings import Settings
@@ -24,6 +25,10 @@ def main():
     args = parse_arguments()
     _apply_fast_mode(args)
     _apply_defaults(args)
+
+    if args.vortex:
+        _run_vortex_mode(args)
+        return
 
     collection_file = Path(args.collection)
 
@@ -71,6 +76,51 @@ def main():
         print(f"\nError: {e}")
         if downloader:
             downloader.keyboard_listener.stop()
+
+
+def _run_vortex_mode(args) -> None:
+    formatter = ConsoleFormatter()
+    formatter.print_header("NEXUS AUTO-DOWNLOADER — MODE VORTEX")
+    print()
+    print("Fonctionnement:")
+    formatter.print_requirement("1. Déclenchez un téléchargement depuis Vortex")
+    formatter.print_requirement("2. Cliquez sur 'DOWNLOAD MANUALLY' dans Vortex (enregistrement)")
+    formatter.print_requirement("3. Cliquez sur 'SLOW DOWNLOAD' sur Nexus Mods (enregistrement)")
+    formatter.print_requirement("4. Le script boucle automatiquement toutes les N secondes")
+    print()
+    formatter.print_config_item("Template Vortex", args.vortex_template)
+    formatter.print_config_item("Template Nexus", args.template_path)
+    formatter.print_config_item("Confiance", f"{args.detection_confidence:.0%}")
+    print()
+    print("Arrêt d'urgence:")
+    formatter.print_requirement("Appuyez sur F4 pour arrêter immédiatement")
+    formatter.print_separator()
+    print()
+
+    if not args.yes:
+        input("Appuyez sur ENTRÉE pour continuer...")
+
+    config = DownloaderConfig(
+        detection_confidence=args.detection_confidence,
+        template_path=args.template_path,
+        delay_for_download=args.delay_download,
+        vortex_mode=True,
+        vortex_template_path=args.vortex_template,
+        vortex_scan_interval=Settings.VORTEX_SCAN_INTERVAL,
+    )
+
+    orchestrator = None
+    try:
+        orchestrator = VortexOrchestrator(config)
+        orchestrator.execute()
+    except KeyboardInterrupt:
+        print("\n\n[STOP] Arrêté par l'utilisateur")
+        if orchestrator:
+            orchestrator.keyboard_listener.stop()
+    except Exception as e:
+        print(f"\nErreur: {e}")
+        if orchestrator:
+            orchestrator.keyboard_listener.stop()
 
 
 def _apply_fast_mode(args):
